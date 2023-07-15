@@ -9,7 +9,7 @@ const HttpError = require("../models/http-error");
 const getAllCategories = async (req, res) => {
   let categories;
   try {
-    categories = await Category.find();
+    categories = await Category.find({});
     res.json({ categories: categories });
     res.status(200);
   } catch (err) {
