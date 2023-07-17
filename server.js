@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 require("dotenv").config();
 
 const HttpError = require("./models/http-error");
+const connectDB = require("./config/connectDB");
 
 //API routes
 const userRoutes = require("./routes/user-routes");
@@ -13,6 +14,8 @@ const categoryRoutes = require("./routes/category-routes");
 const app = express();
 
 app.use(bodyParser.json());
+
+connectDB();
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
