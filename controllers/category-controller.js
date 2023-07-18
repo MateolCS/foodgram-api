@@ -3,10 +3,12 @@ const Category = require("../models/category-model");
 
 const HttpError = require("../models/http-error");
 
+const { validationResult } = require("express-validator");
+
 // @desc    Get all categories
 // @route   GET /api/categories
 // @access  Private
-const getAllCategories = async (req, res) => {
+const getAllCategories = async (req, res, next) => {
   let categories;
   try {
     categories = await Category.find({});
@@ -20,7 +22,7 @@ const getAllCategories = async (req, res) => {
 // @desc    Get category by category id
 // @route   GET /api/categories/:cid
 // @access  Private
-const getCategoryById = async (req, res) => {
+const getCategoryById = async (req, res, next) => {
   const categoryId = req.params.cid;
   let category;
   try {
@@ -34,14 +36,23 @@ const getCategoryById = async (req, res) => {
   }
 
   res.status(200);
-  res.json({ category: category });
+  res.json({ category: category.toObject({ getters: true }) });
 };
 
 // @desc    Create a new category
 // @route   POST /api/categories
 // @access  Private
-const createCategory = async (req, res) => {
+const createCategory = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return next(
+      new HttpError("Invalid inputs passed, please check your data", 422)
+    );
+  }
+
   const { name } = req.body;
+
   const createdCategory = new Category({
     name,
     posts: [],
@@ -49,7 +60,9 @@ const createCategory = async (req, res) => {
   try {
     await createdCategory.save();
     res.status(201);
-    res.json({ category: createdCategory });
+    res.json({
+      category: createdCategory.toObject({ getters: true }),
+    });
   } catch (error) {
     return next(new HttpError("Could not create category", 500));
   }
